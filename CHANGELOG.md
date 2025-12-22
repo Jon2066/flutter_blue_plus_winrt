@@ -1,3 +1,7 @@
+## 0.0.7
+* Fix: ensure `connect` returns `false` on failure instead of throwing an exception.
+* Improvement: refined connection state waiting logic for better reliability.
+
 ## 0.0.6
 * Fix: ensure `connect` method waits for actual physical connection completion before returning a result.
 * Fix: enhanced thread safety during rapid connection and disconnection to prevent `vector erase` crashes.
