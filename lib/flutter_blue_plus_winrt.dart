@@ -434,9 +434,9 @@ final class FlutterBluePlusWinrt extends FlutterBluePlusPlatform {
 
     // flutter restart - wait for all devices to disconnect
     if ((await methodChannel.invokeMethod('flutterRestart')) != 0) {
-      await Future.delayed(Duration(milliseconds: 50));
+      await Future.delayed(const Duration(milliseconds: 50));
       while ((await methodChannel.invokeMethod('connectedCount')) != 0) {
-        await Future.delayed(Duration(milliseconds: 50));
+        await Future.delayed(const Duration(milliseconds: 50));
       }
     }
   }
@@ -547,7 +547,7 @@ final class FlutterBluePlusWinrt extends FlutterBluePlusPlatform {
     dynamic data,
   ) {
     if (data is Map || data is List) {
-      return JsonEncoder.withIndent('  ').convert(data);
+      return const JsonEncoder.withIndent('  ').convert(data);
     } else {
       return data.toString();
     }

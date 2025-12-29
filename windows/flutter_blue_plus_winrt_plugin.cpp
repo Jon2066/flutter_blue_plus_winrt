@@ -298,8 +298,8 @@ FlutterBluePlusWinrtPlugin::GetCharacteristicAsync(
         }
 
         if (servicesResult.Status() == GattCommunicationStatus::Success) {
-            for (auto service : servicesResult.Services()) {
-                if (utils::to_uuid_string(service.Uuid()) == service_uuid_str) {
+                winrt::guid serviceUuid = utils::parse_uuid(service_uuid_str);
+                if (service.Uuid() == serviceUuid) {
                      winrt::guid charUuid = utils::parse_uuid(characteristic_uuid_str);
                      auto charsResult = co_await service.GetCharacteristicsForUuidAsync(charUuid, BluetoothCacheMode::Cached);
                      if (charsResult.Status() != GattCommunicationStatus::Success || charsResult.Characteristics().Size() == 0) {
@@ -1351,6 +1351,7 @@ winrt::fire_and_forget FlutterBluePlusWinrtPlugin::PeriodicConnectionCheck() {
 void FlutterBluePlusWinrtPlugin::HandleMethodCall(const flutter::MethodCall<flutter::EncodableValue>& method_call, std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
     const auto& method = method_call.method_name();
     if (method == "flutterRestart") {
+        int count = static_cast<int>(connected_devices_.size());
         watcher_.Stop();
         for (const auto& pair : connected_devices_) { 
             std::string rid = pair.first;
@@ -1363,7 +1364,7 @@ void FlutterBluePlusWinrtPlugin::HandleMethodCall(const flutter::MethodCall<flut
             if (device) device.Close();
         }
         connected_devices_.clear(); currently_connecting_devices_.clear(); rssi_cache_.clear(); scan_results_cache_.clear(); subscribed_characteristics_.clear(); characteristic_cache_.clear(); descriptor_cache_.clear(); service_cache_.clear();
-        result->Success(flutter::EncodableValue(0)); return;
+        result->Success(flutter::EncodableValue(count)); return;
     }
     if (method == "startScan") { scan_results_cache_.clear(); watcher_.Start(); result->Success(flutter::EncodableValue(true)); return; }
     if (method == "stopScan") { watcher_.Stop(); result->Success(flutter::EncodableValue(true)); return; }
@@ -1441,6 +1442,26 @@ void FlutterBluePlusWinrtPlugin::HandleMethodCall(const flutter::MethodCall<flut
     }
     if (method == "setLogLevel") { result->Success(flutter::EncodableValue(true)); return; }
     if (method == "setOptions") { result->Success(flutter::EncodableValue(true)); return; }
+    if (method == "isSupported") { result->Success(flutter::EncodableValue(true)); return; }
+    if (method == "requestMtu") { result->Success(flutter::EncodableValue(true)); return; }
+    if (method == "requestConnectionPriority") { result->Success(flutter::EncodableValue(true)); return; }
+    if (method == "setPreferredPhy") { result->Success(flutter::EncodableValue(true)); return; }
+    if (method == "turnOn") { result->Success(flutter::EncodableValue(false)); return; }
+    if (method == "turnOff") { result->Success(flutter::EncodableValue(false)); return; }
+    if (method == "clearGattCache") { result->Success(flutter::EncodableValue(true)); return; }
+    if (method == "getPhySupport") { 
+        flutter::EncodableMap response;
+        response[flutter::EncodableValue("le_2m")] = flutter::EncodableValue(true);
+        response[flutter::EncodableValue("le_coded")] = flutter::EncodableValue(true);
+        result->Success(flutter::EncodableValue(response)); 
+        return; 
+    }
+    if (method == "getBondedDevices") {
+        flutter::EncodableMap response;
+        response[flutter::EncodableValue("devices")] = flutter::EncodableList{};
+        result->Success(flutter::EncodableValue(response));
+        return;
+    }
     if (method == "connectedCount") { result->Success(flutter::EncodableValue(static_cast<int>(connected_devices_.size()))); return; }
     if (method == "readRssi") {
         const auto* remote_id_arg = std::get_if<std::string>(method_call.arguments());
