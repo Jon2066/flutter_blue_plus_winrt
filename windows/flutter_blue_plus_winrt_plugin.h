@@ -14,7 +14,9 @@
 #include <vector>
 #include <utility>
 #include <map>
+#include <set>
 #include <atomic>
+#include <mutex>
 
 namespace flutter_blue_plus_winrt {
 
@@ -51,6 +53,9 @@ class FlutterBluePlusWinrtPlugin : public flutter::Plugin {
 
   // UI Thread context
   winrt::apartment_context ui_thread_;
+
+  // Mutex to protect device lists from concurrent access
+  std::mutex devices_mutex_;
 
   std::vector<std::pair<std::string, winrt::Windows::Foundation::IInspectable>> connected_devices_{};
   std::vector<std::pair<std::string, winrt::Windows::Foundation::IInspectable>> currently_connecting_devices_{};
